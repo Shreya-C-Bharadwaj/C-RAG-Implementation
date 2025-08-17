@@ -1,0 +1,26 @@
+[
+  {
+    "content": "{\n    switch(symbol)\n    {\n        case '+':\n        case '-':return 2;\n        case '*':\n        case '/':\n        case '%':return 4;\n        case '$':\n        case '^':return 5;\n        case '(':return 0;\n        case '#':return -1;\n        default:return 8;\n    }\n}",
+    "source": "data/codebase\\infixtopostfix.c.c",
+    "start_line": 3,
+    "signature": "int F(char symbol)"
+  },
+  {
+    "content": "{\n    switch(symbol)\n    {\n        case '+':\n        case '-':return 1;\n        case '*':\n        case '/':\n        case '%':return 3;\n        case '$':\n        case '^':return 6;\n        case '(':return 9;\n        case ')':return 0;\n        default:return 7;\n    }\n}",
+    "source": "data/codebase\\infixtopostfix.c.c",
+    "start_line": 19,
+    "signature": "int G(char symbol)"
+  },
+  {
+    "content": "    {\n        postfix[j]=pop(s,&top);\n        j++;\n    }",
+    "source": "data/codebase\\infixtopostfix.c.c",
+    "start_line": 59,
+    "signature": "else top--; } while(s[top]!='#')"
+  },
+  {
+    "content": "{\n    char infix[100];\n    printf(\"Enter infix expression:\");\n    scanf(\"%s\",infix);\n    infix_to_postfix(infix);\n}",
+    "source": "data/codebase\\infixtopostfix.c.c",
+    "start_line": 70,
+    "signature": "int main()"
+  }
+]
