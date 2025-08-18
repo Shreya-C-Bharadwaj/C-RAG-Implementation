@@ -97,3 +97,24 @@ def retrieve_relevant_chunks(query, k=5):
     query_vec = model.encode([query])
     distances, indices = index.search(np.array(query_vec, dtype=np.float32), k)
     return [chunks_list[i] for i in indices[0] if i < len(chunks_list)]
+
+
+def reset_index():
+    """
+    Clears the in-memory FAISS index and chunks,
+    and deletes persisted vector store files.
+    """
+    global index, chunks_list
+    index = None
+    chunks_list = []
+
+    # Delete stored FAISS index + chunk mapping files
+    if os.path.exists(CHUNK_FILE):
+        os.remove(CHUNK_FILE)
+        print("🗑️ Deleted chunk mapping file:", CHUNK_FILE)
+
+    if os.path.exists(INDEX_FILE):
+        os.remove(INDEX_FILE)
+        print("🗑️ Deleted FAISS index file:", INDEX_FILE)
+
+    print("🔄 FAISS index and chunks have been reset.")

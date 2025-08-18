@@ -1,6 +1,8 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from app.config import MODEL_NAME
 
+
+
 print("Loading Qwen model...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
 model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, trust_remote_code=True)
@@ -16,7 +18,7 @@ def generate_answer(question, chunks):
     )
     messages = [
         {"role": "system",
-          "content": "You are a code generation assistant. Your task is to provide only the requested code or code modifications, without any additional conversational text, explanations, or examples. Focus strictly on the code. If the request is for a code change, provide only the changed code block. If the request is for a new code snippet, provide only that snippet."
+          "content": "You are a code generation assistant. Focus on generating mermaid diagram after every code explanation. Your task is to provide only the requested code or code modifications, without any additional conversational text, explanations, or examples. "
           },
 
         {"role": "user", "content": f"""Answer the question using only the code context below:
@@ -33,6 +35,8 @@ QUESTION:
 
     # Remove the prompt from generated text
     answer_text = response[len(prompt):].strip()
+
+    
 
     # Optional: Remove unwanted prefixes like "Assistant:"
     if "Assistant:" in answer_text:

@@ -4,4 +4,4 @@ CODE_FOLDER = "data/codebase"
 CHUNK_FILE = "data/chunks.json"
 
 
-# uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+# uvicorn app.main:app --reload --host 0.0.0.0 --port 8000

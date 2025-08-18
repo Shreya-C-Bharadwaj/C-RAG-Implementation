@@ -1,5 +1,3 @@
-// MultipleFiles/EnhancedDashboard.tsx
-
 import React, { useState, useEffect } from 'react';
 import { BackendFileUpload } from './BackendFileUpload';
 import { InteractiveChat } from './InteractiveChat';
@@ -19,6 +17,7 @@ interface FileData {
   content: string;
   type: string;
 }
+
 
 // Define ChatMessage interface here so it's accessible to both components
 interface ChatMessage {
@@ -47,10 +46,11 @@ export const EnhancedDashboard: React.FC = () => {
 
   // New state for chat messages, lifted from InteractiveChat
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  // near the top with other useState calls
-  const [backendMode, setBackendMode] = useState<'api' | 'model'>(
-    (localStorage.getItem('backendMode') as 'api' | 'model') || 'api'
-  );
+ // near the top with other useState calls
+const [backendMode, setBackendMode] = useState<'api' | 'model'>(
+  (localStorage.getItem('backendMode') as 'api' | 'model') || 'api'
+);
+
 
   // New state for chat settings, lifted from InteractiveChat
   const [chatSettings, setChatSettings] = useState<ChatSettings>({
@@ -112,7 +112,6 @@ export const EnhancedDashboard: React.FC = () => {
 
   const checkBackendStatus = async () => {
     try {
-      // Check health of the main API backend
       await backendApi.checkHealth();
       setBackendStatus('connected');
     } catch (error) {
@@ -122,46 +121,49 @@ export const EnhancedDashboard: React.FC = () => {
 
   const checkLocalFiles = async () => {
     try {
-      // Always load files from the main backend's perspective
-      const backendFiles = await backendApi.listCodebaseFiles();
-      setLocalFiles(backendFiles);
-      setHasBackendFiles(backendFiles.length > 0);
-      localStorage.setItem('uploadedFiles', JSON.stringify(backendFiles)); // Sync local storage
-    } catch (error) {
-      console.error('Error checking local files from backend:', error);
-      // Fallback to local storage if backend fails, but indicate potential desync
       const savedFiles = localStorage.getItem('uploadedFiles');
       if (savedFiles) {
         const parsedFiles = JSON.parse(savedFiles);
         setLocalFiles(parsedFiles);
-        setHasBackendFiles(parsedFiles.length > 0);
+        setHasBackendFiles(parsedFiles.length > 0); // Update hasBackendFiles based on local storage
       }
+    } catch (error) {
+      console.error('Error checking local files:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleBackendFilesUploaded = async (files: File[]) => {
-    // This function is called by BackendFileUpload.
-    // BackendFileUpload should call backendApi.uploadCodeFiles, which targets the main API.
-    // After successful upload, re-check files from backend to update state.
-    await checkLocalFiles(); // Re-fetch files from the backend to ensure state is consistent
-    setHasBackendFiles(true); // This will be true if checkLocalFiles finds files
+    setHasBackendFiles(true);
+
+    // Also save to localStorage for local features
+    try {
+      const fileData: FileData[] = await Promise.all(
+        files.map(async (file) => ({
+          name: file.name,
+          content: await file.text(),
+          type: file.name.split('.').pop() || 'unknown'
+        }))
+      );
+
+      const existingFiles = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
+      const newFiles = fileData.filter(newFile =>
+        !existingFiles.some((existing: FileData) => existing.name === newFile.name)
+      );
+
+      const updatedFiles = [...existingFiles, ...newFiles];
+      localStorage.setItem('uploadedFiles', JSON.stringify(updatedFiles));
+      setLocalFiles(updatedFiles);
+    } catch (error) {
+      console.error('Error saving files locally:', error);
+    }
   };
 
-  const handleClearBackendFiles = async () => {
-    // This function is called by BackendFileUpload and the "Clear All Data" button.
-    // It should call the main API backend to clear files.
-    try {
-      await backendApi.clearCodebase();
-      setHasBackendFiles(false);
-      setLocalFiles([]);
-      setChatMessages([]); // Clear chat messages when files are cleared
-      localStorage.removeItem('uploadedFiles'); // Clear local storage as well
-    } catch (error) {
-      console.error('Error clearing backend files:', error);
-      alert('Failed to clear files. Please check backend connection.');
-    }
+  const handleClearBackendFiles = () => {
+    setHasBackendFiles(false);
+    // Clear chat messages when files are cleared (optional, but makes sense)
+    setChatMessages([]);
   };
 
   // Callback to update chat messages from InteractiveChat
@@ -173,6 +175,7 @@ export const EnhancedDashboard: React.FC = () => {
   const handleUpdateChatSettings = (newSettings: ChatSettings) => {
     setChatSettings(newSettings);
   };
+
 
   const tabs = [
     { id: 'chat' as const, label: 'AI Chat', icon: MessageSquare },
@@ -271,7 +274,7 @@ export const EnhancedDashboard: React.FC = () => {
             {/* Tab Content */}
             <div className="min-h-[600px]">
               {activeTab === 'chat' && (
-                <>
+   <>
                   <div className="flex items-center mb-4 space-x-4">
                     <label className="font-medium">Backend Mode:</label>
 
@@ -326,7 +329,7 @@ export const EnhancedDashboard: React.FC = () => {
 
               {activeTab === 'files' && (
                 <div className="space-y-6">
-                  <UploadedFiles isDarkMode={isDarkMode} /> {/* No backendMode needed here, as it always talks to main API */}
+                  <UploadedFiles isDarkMode={isDarkMode} />
                   <div className={`p-6 rounded-lg ${themeClasses.cardBg} border ${themeClasses.border}`}>
                     <h2 className="text-xl font-semibold mb-4">Upload More Files</h2>
                     <BackendFileUpload
@@ -344,7 +347,6 @@ export const EnhancedDashboard: React.FC = () => {
                 <ModuleStructureDiagram
                   files={localFiles}
                   retrievedContext={lastRetrievedContext}
-                  backendMode={backendMode} // Pass backendMode
                 />
               )}
               {activeTab === 'performance' && (
@@ -356,7 +358,10 @@ export const EnhancedDashboard: React.FC = () => {
             <div className={`flex justify-center pt-6 border-t ${themeClasses.border}`}>
               <button
                 onClick={() => {
-                  handleClearBackendFiles(); // This now calls backendApi.clearCodebase
+                  handleClearBackendFiles();
+                  localStorage.removeItem('uploadedFiles');
+                  setLocalFiles([]);
+                  setChatMessages([]); // Also clear chat messages on clear all
                 }}
                 className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
               >
