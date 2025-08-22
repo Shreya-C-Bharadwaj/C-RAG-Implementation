@@ -1,26 +1,14 @@
 [
   {
-    "content": "{\n    switch(symbol)\n    {\n        case '+':\n        case '-':return 2;\n        case '*':\n        case '/':\n        case '%':return 4;\n        case '$':\n        case '^':return 5;\n        case '(':return 0;\n        case '#':return -1;\n        default:return 8;\n    }\n}",
-    "source": "data/codebase\\infixtopostfix.c.c",
-    "start_line": 3,
-    "signature": "int F(char symbol)"
+    "content": "    while (temp > 0) {\n        int digit = temp % 10;\n        sum += pow(digit, K);\n        temp /= 10;\n    }",
+    "source": "data/codebase\\armstrong.c",
+    "start_line": 4,
+    "signature": "bool isArmstrong(int N) { int temp = N; int sum = 0;  // Get the number of digits // Adding 1 to compensate for the loss of fraction part // of the value returned by log10 due to the conversion // into integer int K = log10(temp) + 1;  // Calculate the sum of the digits raised to the power of // num_digits"
   },
   {
-    "content": "{\n    switch(symbol)\n    {\n        case '+':\n        case '-':return 1;\n        case '*':\n        case '/':\n        case '%':return 3;\n        case '$':\n        case '^':return 6;\n        case '(':return 9;\n        case ')':return 0;\n        default:return 7;\n    }\n}",
-    "source": "data/codebase\\infixtopostfix.c.c",
-    "start_line": 19,
-    "signature": "int G(char symbol)"
-  },
-  {
-    "content": "    {\n        postfix[j]=pop(s,&top);\n        j++;\n    }",
-    "source": "data/codebase\\infixtopostfix.c.c",
-    "start_line": 59,
-    "signature": "else top--; } while(s[top]!='#')"
-  },
-  {
-    "content": "{\n    char infix[100];\n    printf(\"Enter infix expression:\");\n    scanf(\"%s\",infix);\n    infix_to_postfix(infix);\n}",
-    "source": "data/codebase\\infixtopostfix.c.c",
-    "start_line": 70,
-    "signature": "int main()"
+    "content": "int main() {\n    int N = 153;\n\n    // Check if the number is an Armstrong number\n    if (isArmstrong(N)) {\n        printf(\"Yes, %d is an Armstrong Number\\n\", N);\n    }\n    else {\n        printf(\"No, %d is not an Armstrong Number\\n\", N);\n    }\n\n    return 0;\n}",
+    "source": "data/codebase\\armstrong.c",
+    "start_line": 23,
+    "signature": "return (sum == N); } "
   }
 ]

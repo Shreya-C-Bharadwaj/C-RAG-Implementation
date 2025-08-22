@@ -15,20 +15,15 @@ CHUNK_FILE = "vector_store/id_mapping.json"
 INDEX_FILE = "vector_store/index.faiss"
 
 def get_code_files(directory):
-    """
-    Recursively collects supported code files from a directory.
-    Supports multiple languages now, not just C/C++.
-    """
-    supported_exts = (
-        ".cpp", ".c", ".h",  # C/C++
-        ".py", ".java", ".js", ".ts", ".tsx", ".cs", ".go", ".php", ".rb", ".swift"
-    )
-
+    supported_exts = (".cpp", ".c", ".h", ".hpp", ".cc", ".cxx",
+                      ".py", ".java", ".js", ".ts", ".tsx",
+                      ".cs", ".go", ".php", ".rb", ".swift")
     return [
         os.path.join(dp, f)
         for dp, _, files in os.walk(directory)
         for f in files if f.lower().endswith(supported_exts)
     ]
+
 
 def process_and_store_local_code(base_path=CODE_FOLDER):
     """
@@ -97,24 +92,3 @@ def retrieve_relevant_chunks(query, k=5):
     query_vec = model.encode([query])
     distances, indices = index.search(np.array(query_vec, dtype=np.float32), k)
     return [chunks_list[i] for i in indices[0] if i < len(chunks_list)]
-
-
-def reset_index():
-    """
-    Clears the in-memory FAISS index and chunks,
-    and deletes persisted vector store files.
-    """
-    global index, chunks_list
-    index = None
-    chunks_list = []
-
-    # Delete stored FAISS index + chunk mapping files
-    if os.path.exists(CHUNK_FILE):
-        os.remove(CHUNK_FILE)
-        print("🗑️ Deleted chunk mapping file:", CHUNK_FILE)
-
-    if os.path.exists(INDEX_FILE):
-        os.remove(INDEX_FILE)
-        print("🗑️ Deleted FAISS index file:", INDEX_FILE)
-
-    print("🔄 FAISS index and chunks have been reset.")
